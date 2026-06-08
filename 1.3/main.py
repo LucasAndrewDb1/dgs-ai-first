@@ -12,6 +12,24 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from langchain_core.documents import Document
 from sentence_transformers import CrossEncoder
 
+load_dotenv()
+
+DOCUMENTS_PATH = "./docs"
+VECTOR_STORE_DIRECTORY = "db/chroma_db"
+
+EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
+RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
+
+CHUNK_SIZE = 1200
+CHUNK_OVERLAP = 150
+
+RRF_K = 60
+CANDIDATE_POOL = 20
+DENSE_K = 10
+SPARSE_K = 10
+FINAL_K = 5
+ENSEMBLE_WEIGHTS = [0.5, 0.5]
+
 class HybridRerankRetriever:
     def __init__(self, dense, sparse, reranker, weights):
         self.dense, self.sparse, self.reranker, self.weights = dense, sparse, reranker, weights
@@ -41,24 +59,6 @@ class HybridRerankRetriever:
             doc.metadata["rerank_score"] = float(score)
         pool.sort(key=lambda d: d.metadata["rerank_score"], reverse=True)
         return pool[:self.final_k]
-
-load_dotenv()
-
-DOCUMENTS_PATH = "./docs"
-VECTOR_STORE_DIRECTORY = "db/chroma_db"
-
-EMBEDDING_MODEL = "Qwen/Qwen3-Embedding-0.6B"
-RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
-
-CHUNK_SIZE = 1200
-CHUNK_OVERLAP = 150
-
-RRF_K = 60
-CANDIDATE_POOL = 20
-DENSE_K = 10
-SPARSE_K = 10
-FINAL_K = 5
-ENSEMBLE_WEIGHTS = [0.5, 0.5]
 
 def load_documents(doc_path):
     print(f"Loading path: '{doc_path}'")
